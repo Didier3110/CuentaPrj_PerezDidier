@@ -1,0 +1,181 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class PrincipalCuenta {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        ArrayList<Cuenta> cuentas = new ArrayList<>();
+        Cuenta cuentaActual = null;
+        System.out.println("   CLI de Prueba - Clase Cuenta");
+
+
+        boolean salir = false;
+        while (!salir) {
+            System.out.println("\nMenú principal");
+            System.out.println("1) Crear cuenta");
+            System.out.println("2) Conocer cantidad de cuentas creadas");
+            System.out.println("3) Listar cuentas");
+            System.out.println("4) Seleccionar cuenta actual");
+            System.out.println("5) Asignar nombre del cuenta habiente (cuenta actual)");
+            System.out.println("6) Depositar (cuenta actual)");
+            System.out.println("7) Retirar (cuenta actual)");
+            System.out.println("8) Consultar saldo (cuenta actual)");
+            System.out.println("9) Consultar estado de la cuenta (actual)");
+            System.out.println("0) Salir");
+            System.out.print("Opción: ");
+            String op = sc.nextLine().trim();
+
+            switch (op) {
+                case "1": { // Crear cuenta
+                    System.out.print("¿Desea indicar el nombre del cuenta habiente ahora? (s/n): ");
+                    String respuesta = sc.nextLine().trim();
+                    System.out.print("Saldo inicial: ");
+                    String saldoS = sc.nextLine().trim();
+                    double saldoInicial;
+                    try {
+                        saldoInicial = Double.parseDouble(saldoS);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Número inválido, se usará 0.0 como saldo inicial.");
+                        saldoInicial = 0.0;
+                    }
+
+                    Cuenta c;
+                    if (respuesta.equalsIgnoreCase("s")) {
+                        System.out.print("Nombre del cuenta habiente: ");
+                        String nombre = sc.nextLine().trim();
+                        c = new Cuenta(nombre, saldoInicial);
+                    } else {
+                        c = new Cuenta(saldoInicial);
+                    }
+
+                    cuentas.add(c);
+                    cuentaActual = c;
+                    System.out.println("Cuenta creada y seleccionada: " + c.getCodCuenta());
+                    break;
+                }
+                case "2": { // Cantidad de cuentas creadas
+                    System.out.println("Cantidad de cuentas creadas: " + Cuenta.getCantCuentasCreadas());
+                    break;
+                }
+                case "3": { // Listar cuentas
+                    if (cuentas.isEmpty()) {
+                        System.out.println("No hay cuentas creadas.");
+                    } else {
+                        System.out.println("Código   | Saldo");
+                        for (int i = 0; i < cuentas.size(); i++) {
+                            Cuenta c = cuentas.get(i);
+                            System.out.printf("%-8s | %.2f%n", c.getCodCuenta(), c.getSaldo());
+                        }
+                    }
+                    break;
+                }
+                case "4": { // Seleccionar cuenta actual
+                    if (cuentas.isEmpty()) {
+                        System.out.println("Cree una cuenta primero.");
+                        break;
+                    }
+                    System.out.print("Código de la cuenta a seleccionar (ej: cta-1): ");
+                    String codigo = sc.nextLine().trim();
+                    Cuenta encontrada = buscarCuentaPorCodigo(cuentas, codigo);
+                    if (encontrada != null) {
+                        cuentaActual = encontrada;
+                        System.out.println("Cuenta " + cuentaActual.getCodCuenta() + " seleccionada.");
+                    } else {
+                        System.out.println("No existe una cuenta con ese código.");
+                    }
+                    break;
+                }
+                case "5": { // Asignar nombre del cuenta habiente
+                    if (cuentaActual == null) {
+                        System.out.println("Debe crear y seleccionar una cuenta primero.");
+                        break;
+                    }
+                    System.out.print("Nombre del cuenta habiente: ");
+                    String nombre = sc.nextLine().trim();
+                    cuentaActual.setNombreCuentaHabiente(nombre);
+                    System.out.println("Nombre asignado correctamente.");
+                    break;
+                }
+                case "6": { // Depositar
+                    if (cuentaActual == null) {
+                        System.out.println("Debe crear y seleccionar una cuenta primero.");
+                        break;
+                    }
+                    System.out.print("Monto a depositar: ");
+                    String montoS = sc.nextLine().trim();
+                    double monto;
+                    try {
+                        monto = Double.parseDouble(montoS);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Número inválido, no se realizó el depósito.");
+                        break;
+                    }
+                    double saldoAntes = cuentaActual.getSaldo();
+                    double saldoDespues = cuentaActual.depositar(monto);
+                    if (saldoDespues > saldoAntes) {
+                        System.out.printf("Depósito exitoso. Nuevo saldo: %.2f%n", saldoDespues);
+                    } else {
+                        System.out.println("El monto debe ser mayor a cero. No se realizó el depósito.");
+                    }
+                    break;
+                }
+                case "7": { // Retirar
+                    if (cuentaActual == null) {
+                        System.out.println("Debe crear y seleccionar una cuenta primero.");
+                        break;
+                    }
+                    System.out.print("Monto a retirar: ");
+                    String montoS = sc.nextLine().trim();
+                    double monto;
+                    try {
+                        monto = Double.parseDouble(montoS);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Número inválido, no se realizó el retiro.");
+                        break;
+                    }
+                    double saldoAntes = cuentaActual.getSaldo();
+                    double saldoDespues = cuentaActual.retirar(monto);
+                    if (saldoDespues < saldoAntes) {
+                        System.out.printf("Retiro exitoso. Nuevo saldo: %.2f%n", saldoDespues);
+                    } else {
+                        System.out.println("Retiro no posible: monto inválido o fondos insuficientes.");
+                    }
+                    break;
+                }
+                case "8": { // Consultar saldo
+                    if (cuentaActual == null) {
+                        System.out.println("Debe crear y seleccionar una cuenta primero.");
+                        break;
+                    }
+                    System.out.printf("Saldo actual: %.2f%n", cuentaActual.getSaldo());
+                    break;
+                }
+                case "9": { // Consultar estado
+                    if (cuentaActual == null) {
+                        System.out.println("Debe crear y seleccionar una cuenta primero.");
+                        break;
+                    }
+                    System.out.println(cuentaActual.toString());
+                    break;
+                }
+                case "0": {
+                    salir = true;
+                    System.out.println("¡Hasta luego!");
+                    break;
+                }
+                default:
+                    System.out.println("Opción inválida.");
+            }
+        }
+        sc.close();
+    }
+
+    private static Cuenta buscarCuentaPorCodigo(ArrayList<Cuenta> cuentas, String codigo) {
+        for (int i = 0; i < cuentas.size(); i++) {
+            if (cuentas.get(i).getCodCuenta().equalsIgnoreCase(codigo)) {
+                return cuentas.get(i);
+            }
+        }
+        return null;
+    }
+}
